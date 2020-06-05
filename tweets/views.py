@@ -24,8 +24,16 @@ def tweet_detail_view(request, tweet_id, *args, **kwargs):
     return json data
 
     """
+    data = {
+        "id": tweet_id,
+        # "image_path": obj.image.url
+    }
     try:
         obj = Tweet.objects.get(id=tweet_id)
+        data['content'] = obj.content
+        status = 200
     except:
-        raise Http404
-    return HttpResponse(f'<h1>Hello {tweet_id} - {obj.content}</h1>')
+        data['message'] = 'Not Found'
+        status = 404
+
+    return JsonResponse(data, status=status)
