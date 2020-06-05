@@ -4,5 +4,7 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.pythonPath": "/home/majestysoft/.local/share/virtualenvs/itweet-AqNvkkdF/bin/python"
+	}
 }
