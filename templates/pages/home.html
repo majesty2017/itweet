@@ -5,7 +5,9 @@
 {% block content %}
 <h1 class="text-center">Welcome to iTweet</h1>
 
-<div id="tweets">Loading...</div>
+<div class="container">
+    <div id="tweets">Loading...</div>
+</div>
 
 <script>
     const tweetElement = document.getElementById('tweets')
@@ -15,18 +17,36 @@
     const url = '/tweets'
     const responseType = 'json'
 
+    function handleDidLike(tweet_id, currentCount) {
+        
+    }
+
+    function likeBtn(tweet) {
+        return '<button class="btn btn-primary btn-sm" onclick="handleDidLike(tweet.id, tweet.likes)">Like</button>'
+    }
+
+    function formatTweetElement(tweet) {
+        var formattedTweet = '<div class="mb-4 tweet" id="tweet-' + tweet.id 
+        + '"><p>' + tweet.content +
+        '</p><div class="btn-group">' + likeBtn(tweet) +
+         '</div></div>'
+        return formattedTweet
+    }
+
     xhr.responseType = responseType
     xhr.open(method, url)
     xhr.onload = function() {
         const serverResponse = xhr.response
         var listedItems = serverResponse.response
         var finalTweetStr = ''
-        var i
-        for (i = 0; i < array.length; i++) {
-            const element = array[i];
-            
+        var i;
+        for (i = 0; i < listedItems.length; i++) {
+            var tweetObj = listedItems[i]
+
+            var currentItems = formatTweetElement(tweetObj)
+            finalTweetStr += currentItems
         }
-        console.log(listedItems);
+        tweetElement.innerHTML = finalTweetStr
         
     }
     xhr.send()
