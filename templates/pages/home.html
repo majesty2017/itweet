@@ -3,52 +3,23 @@
 {% block head_title %} iTweet {% endblock %}
 
 {% block content %}
-<h1 class="text-center">Welcome to iTweet</h1>
 
-<div class="container">
-    <div id="tweets">Loading...</div>
+<div class="row text-center">
+    <h1 class="col">Welcome to iTweet</h1>
 </div>
 
-<script>
-    const tweetElement = document.getElementById('tweets')
-    
-    const xhr = new XMLHttpRequest()
-    const method = 'GET'
-    const url = '/tweets'
-    const responseType = 'json'
+<div class="row mb-3">
+    <div class="col-md-4 mx-auto col-10">
+        <form class="form" action="/create-tweet" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="/">
+            <div class="form-group">
+                <textarea class="form-control" name="content" placeholder="Your tweet..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Tweet</button>
+        </form>
+    </div>
+</div>
 
-    function handleDidLike(tweet_id, currentCount) {
-        
-    }
-
-    function likeBtn(tweet) {
-        return '<button class="btn btn-primary btn-sm" onclick="handleDidLike(tweet.id, tweet.likes)">Like</button>'
-    }
-
-    function formatTweetElement(tweet) {
-        var formattedTweet = '<div class="mb-4 tweet" id="tweet-' + tweet.id 
-        + '"><p>' + tweet.content +
-        '</p><div class="btn-group">' + likeBtn(tweet) +
-         '</div></div>'
-        return formattedTweet
-    }
-
-    xhr.responseType = responseType
-    xhr.open(method, url)
-    xhr.onload = function() {
-        const serverResponse = xhr.response
-        var listedItems = serverResponse.response
-        var finalTweetStr = ''
-        var i;
-        for (i = 0; i < listedItems.length; i++) {
-            var tweetObj = listedItems[i]
-
-            var currentItems = formatTweetElement(tweetObj)
-            finalTweetStr += currentItems
-        }
-        tweetElement.innerHTML = finalTweetStr
-        
-    }
-    xhr.send()
-</script>
+<div class="row" id="tweets">Loading...</div>
 {% endblock %}
