@@ -11,6 +11,23 @@
 </script>
     <script>
 
+    function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+    }
+    
+
     function handleTweetFormError(msg, display) {
         var myErrorDiv = document.getElementById('tweet-create-form-error')
         if (display === true) {
@@ -51,18 +68,24 @@
                     if (contentErrorMgs) {
                         handleTweetFormError(contentErrorMgs, true)
                     } else {
-                        alert('An error occurred. Please try again later.')
+                        alertMsg()
                     }
                 } else {
-                    alert('An error occurred. Please try again later.')
+                    alertMsg()
                 }
                 console.log(errorJson);
+            } else if (xhr.status === 401) {
+                alertLogin()
+                window.location.href = '/login'
+            } else if (xhr.status === 403) {
+                alertLogin()
+                window.location.href = '/login'
             } else if (xhr.status === 500) {
-                alert('There was a server error. Please try again.')
+                alertMsg()
             }
         }
         xhr.onerror = function() {
-            alert('An error occurred. Please try again later.')
+            alertMsg()
         }
         xhr.send(myFormData)
     }
@@ -82,7 +105,7 @@
         xhr.open(method, url)
         xhr.onload = function() {
             const serverResponse = xhr.response
-            var listedItems = serverResponse.response
+            var listedItems = serverResponse
             var finalTweetStr = ''
             var i;
             for (i = 0; i < listedItems.length; i++) { 
@@ -97,23 +120,66 @@
 
     loadTweets(tweetsContainerElement)
 
-    function handleDidLike(tweet_id, currentCount) {
+    function handleTweetActionBtn(tweet_id, currentCount, action) {
         console.log(tweet_id, currentCount);
-        
+        const url = 'api/tweets/action'
+        const method = 'POST'
+        const data = JSON.stringify({
+            id: tweet_id,
+            action: action
+        })
+        const xhr = new XMLHttpRequest()
+        const csrftoken = getCookie('csrftoken');
+        xhr.open(method, url)
+        xhr.setRequestHeader('Content-Type', 'application/json')
+        xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest')
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+        xhr.setRequestHeader('X-CSRFToken', csrftoken)
+        xhr.onload = function() {
+            loadTweets(tweetsContainerElement)
+        }
+        xhr.send(data)
     }
+    
 
     function likeBtn(tweet) {
-        return '<button class="btn btn-primary btn-sm" onclick=handleDidLike("' + tweet.id + 
-        '","' + tweet.likes +
-         '")> '+ tweet.likes +' Like</button>'
+        return "<button class='btn btn-primary btn-sm' onclick=handleTweetActionBtn(" 
+        + tweet.id + "," + tweet.likes + ",'like')>" + tweet.likes + " Like</button>"
+    }
+    
+
+    function UnLikeBtn(tweet) {
+        return "<button class='btn btn-outline-primary btn-sm' onclick=handleTweetActionBtn("
+        + tweet.id + "," + tweet.likes + ",'unlike')> Unlike</button>"
+    }
+
+    function RetweetBtn(tweet) {
+        return "<button class='btn btn-outline-success btn-sm' onclick=handleTweetActionBtn(" 
+        + tweet.id + "," + tweet.likes + ",'retweet')> Retweet</button>"
     }
 
     function formatTweetElement(tweet) {
         var formattedTweet = '<div class="col-12 col-md-10 mx-auto border rounded py-3 mb-4 tweet" id="tweet-' + tweet.id 
         + '"><p>' + tweet.content +
-        '</p><div class="btn-group">' + likeBtn(tweet) +
+        '</p><div class="btn-group">' + 
+            likeBtn(tweet) +
+            UnLikeBtn(tweet) +
+            RetweetBtn(tweet) +
          '</div></div>'
         return formattedTweet
+    }
+
+
+
+
+// ======================Error MSG===============
+
+    function alertMsg() {
+        alert('An error occurred. Please try again later. ')        
+    }
+
+    function alertLogin() {
+        alert('You must login!')
     }
 
     
